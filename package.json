@@ -1,0 +1,28 @@
+{
+  "name": "http-api-assignment-ii",
+  "version": "1.0.0",
+  "description": "API assignment 2",
+  "main": "eslint.config.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Tests Complete\"",
+    "nodemon": "nodemon --watch ./src ./srv/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Catastr0phi/http-api-assignment-ii.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Catastr0phi/http-api-assignment-ii/issues"
+  },
+  "homepage": "https://github.com/Catastr0phi/http-api-assignment-ii#readme",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.0.0",
+    "globals": "^17.3.0",
+    "nodemon": "^3.1.11"
+  }
+}

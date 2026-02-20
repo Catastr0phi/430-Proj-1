@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Our simple HTTP server</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+
+  <script>
+    const handleResponse = async (response) => {
+      // get page content section and clear
+      const content = document.querySelector('#content');
+      content.innerHTML = '';
+
+      // Create header for status message
+      const statusHeader = document.createElement('h1');
+
+      // Switch statement for header based on code
+      switch (response.status) {
+        case 200:
+          statusHeader.textContent = 'Success';
+          break;
+        case 201:
+          statusHeader.textContent = 'Created';
+          break;
+        case 204:
+          statusHeader.textContent = 'Updated (No Content)';
+          break;
+        case 400:
+          statusHeader.textContent = 'Bad Request';
+          break;
+        case 404:
+          statusHeader.textContent = 'Not Found';
+          break;
+        default:
+          statusHeader.textContent = 'Error not implemented. Something has gone very wrong!'
+          break;
+      }
+
+      content.appendChild(statusHeader);
+
+      // get json obj
+      const jsonOBJ = await response.json();
+
+      console.log(jsonOBJ);
+
+      const messageParagraph = document.createElement('p');
+
+      // If theres a message, just print that. 
+      // If not, it is the users json, and print the whole thing
+      messageParagraph.textContent = jsonOBJ.message ? 'Message: ' + jsonOBJ.message : jsonOBJ;
+
+      content.append(messageParagraph);
+    }
+
+    const sendPostRequest = async (form) => {
+      const url = form.getAttribute('action');
+      const method = form.getAttribute('method');
+
+      const name = form.querySelector('#nameField').value;
+      const age = form.querySelector('#ageField').value;
+
+      const formData = JSON.stringify({ name, age });
+
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': formData.length,
+          'Accept': 'application/json'
+        },
+        body: formData
+      }
+
+      const fetchResponse = await fetch(url, options);
+
+      handleResponse(fetchResponse);
+    }
+
+    // Can also handle HEAD requests
+    const sendGetRequest = async (form) => {
+
+      const url = form.querySelector('#urlField').value;
+      const method = form.querySelector('#methodSelect').value;
+
+      const options = {
+        method: method,
+        headers: {
+          'Accept': 'application/json'
+        }
+      }
+
+      const fetchResponse = await fetch(url, options);
+
+      handleResponse(fetchResponse);
+    }
+
+
+    const init = () => {
+      const nameForm = document.querySelector('#nameForm');
+      const userForm = document.querySelector('#userForm');
+
+      // Prevent the forms default behavior
+      const sendPost = (e) => {
+        e.preventDefault();
+        sendPostRequest(nameForm);
+        return false;
+      }
+
+      const sendGet = (e) => {
+        e.preventDefault();
+        sendGetRequest(userForm);
+        return false;
+      }
+
+      nameForm.addEventListener('submit', sendPost);
+      userForm.addEventListener('submit', sendGet);
+    }
+
+    //When the window loads, run init.
+    window.onload = init;
+  </script>
+</head>
+
+<body>
+  <section id="top">
+    <h3>POST Status Code Tests</h3>
+    <form id="nameForm" action="/addUser" method="post">
+      <label for="name">Name: </label>
+      <input id="nameField" type="text" name="name" />
+      <label for="age">Age: </label>
+      <input id="ageField" type="number" name="age" min="0" max="100" step="1" />
+      <input type="submit" value="Add User" />
+    </form>
+    <form id="userForm" action="/getUsers" method="get">
+      <select id='urlField'>
+        <option value='/getUsers'>/getUsers</option>
+        <option value='/notReal'>/notReal</option>
+      </select>
+      <select id="methodSelect">
+        <option value="get">GET</option>
+        <option value="head">HEAD</option>
+      </select>
+      <input type="submit" value="Get User" />
+    </form>
+  </section>
+  <section id="content">
+  </section>
+</body>
+
+</html>
