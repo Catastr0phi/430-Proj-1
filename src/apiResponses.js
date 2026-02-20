@@ -1,4 +1,18 @@
-const users = {}
+const fs = require('fs');
+
+let trackData = {};
+
+fs.readFile(`${__dirname}/trackData.json`, (err, data) => { 
+
+    if (err) {
+        console.log("Couldn't load json!");
+        throw err; 
+    }
+
+    trackData = JSON.parse(data); 
+}); 
+
+const users = {};
 
 // Common function for sending a response
 const respond = (request, response, status, object) => {
@@ -17,13 +31,13 @@ const respond = (request, response, status, object) => {
     response.end();
 }
 
-const getUsers = (request, response) => {
-    const usersJSON = JSON.stringify(users);
+const getTracks = (request, response) => {
+    const tracksJSON = JSON.stringify(trackData.tracks);
 
-    return respond(request, response, 200, usersJSON);
+    return respond(request, response, 200, tracksJSON);
 }
 
-const addUser = (request, response) => {
+const rateTrack = (request, response) => {
     // Default to success message
     const responseJSON = {
         message: 'Created successfully'
@@ -69,7 +83,7 @@ const notFound = (request, response) => {
 }
 
 module.exports = {
-    getUsers,
-    addUser,
+    getTracks,
+    rateTrack,
     notFound
 }

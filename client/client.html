@@ -40,16 +40,30 @@
 
       // get json obj
       const jsonOBJ = await response.json();
+      const parsedJson = JSON.parse(jsonOBJ)
 
-      console.log(jsonOBJ);
+      for (let i = 0; i < parsedJson.length; i++) {
+        const nameH = document.createElement('h5');
+        const artistH = document.createElement('p');
 
-      const messageParagraph = document.createElement('p');
+        nameH.textContent = parsedJson[i].name;
+        artistH.textContent = 'By ' + parsedJson[i].relationships.artists[0].who;
 
-      // If theres a message, just print that. 
-      // If not, it is the users json, and print the whole thing
-      messageParagraph.textContent = jsonOBJ.message ? 'Message: ' + jsonOBJ.message : jsonOBJ;
+        content.appendChild(nameH);
+        content.appendChild(artistH);
 
-      content.append(messageParagraph);
+        // Not all tracks have art
+        // TODO: If no track art, use album art
+        if (parsedJson[i].children.artworks[0]) {
+          const image = document.createElement('img');
+
+          image.src = parsedJson[i].children.artworks[0].url;
+          image.width = 200;
+          image.height = 200;
+
+          content.appendChild(image);
+        }
+      }
     }
 
     const sendPostRequest = async (form) => {
@@ -131,9 +145,9 @@
       <input id="ageField" type="number" name="age" min="0" max="100" step="1" />
       <input type="submit" value="Add User" />
     </form>
-    <form id="userForm" action="/getUsers" method="get">
+    <form id="userForm" action="/getTracks" method="get">
       <select id='urlField'>
-        <option value='/getUsers'>/getUsers</option>
+        <option value='/getTracks'>/getTracks</option>
         <option value='/notReal'>/notReal</option>
       </select>
       <select id="methodSelect">
