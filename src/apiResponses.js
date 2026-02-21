@@ -2,22 +2,23 @@ const fs = require('fs');
 
 let trackData = {};
 
-fs.readFile(`${__dirname}/trackData.json`, (err, data) => { 
+fs.readFile(`${__dirname}/trackData.json`, (err, data) => {
 
     if (err) {
         console.log("Couldn't load json!");
-        throw err; 
+        throw err;
     }
 
-    trackData = JSON.parse(data); 
-}); 
+    trackData = JSON.parse(data);
+});
 
 const users = {};
 
 // Common function for sending a response
 const respond = (request, response, status, object) => {
-    console.log(object);
-    const jsonString = JSON.stringify(object);
+    var jsonString = JSON.stringify(object);
+    console.log(jsonString);
+    //const fixedString = jsonString.replace("'", "\"");
 
     response.writeHead(status, {
         'Content-Type': 'application/json',
@@ -31,10 +32,68 @@ const respond = (request, response, status, object) => {
     response.end();
 }
 
-const getTracks = (request, response) => {
-    const tracksJSON = JSON.stringify(trackData.tracks);
+const getAllTracks = (request, response) => {
+    const responseJSON = {
+        id: "allTracks", // Each response type gets its own ID
+        tracks: []
+    };
 
-    return respond(request, response, 200, tracksJSON);
+    for (let i = 0; i < trackData.tracks.length; i++) {
+        let name = trackData.tracks[i].name;
+
+        // Get all artists
+        const artistsOBJ = [];
+
+        for (let j = 0; j < trackData.tracks[i].relationships.artists.length; j++) {
+            let artistDirName = trackData.tracks[i].relationships.artists[j].who;
+
+            // Find artist directory
+            let artistData = trackData.artists.find(a => a.directory === artistDirName);
+
+            artistsOBJ.push({
+                artistName: artistData.name
+            })
+        }
+
+        // Get album
+        let albumDirName = trackData.tracks[i].relationships.album;
+        let albumData = trackData.albums.find(a => a.directory === albumDirName);
+        let album = albumData.name;
+
+        // Get track art
+        // If track doesn't have unique art, use the album art
+        let trackArt;
+        if (trackData.tracks[i].children.artworks[0]) {
+            trackArt = trackData.tracks[i].children.artworks[0].url;
+        }
+        else {
+            trackArt = albumData.children.artworks[0].url;
+        }
+
+        responseJSON.tracks.push({
+            name: name,
+            artists: artistsOBJ,
+            album: album,
+            trackArt: trackArt
+        });
+    }
+
+    return respond(request, response, 200, responseJSON);
+}
+
+const getAllArtists = (request, response) => {
+    const responseJSON = {
+        id: "allArtists", // Each response type gets its own ID
+        artists: []
+    };
+
+    for (let i = 0; i < trackData.artists.length; i++) {
+        responseJSON.artists.push({
+            artistName: trackData.artists[i].name
+        })
+    }
+
+    return respond(request, response, 200, responseJSON);
 }
 
 const rateTrack = (request, response) => {
@@ -83,7 +142,8 @@ const notFound = (request, response) => {
 }
 
 module.exports = {
-    getTracks,
+    getAllTracks,
+    getAllArtists,
     rateTrack,
     notFound
 }

@@ -19,3 +19,7 @@ html, body {
   font-size: 2em;
   text-align: center;
 }
+
+.trackDiv {
+  border: 2px solid black;
+}

@@ -39,32 +39,59 @@
       content.appendChild(statusHeader);
 
       // get json obj
-      const jsonOBJ = await response.json();
-      const parsedJson = JSON.parse(jsonOBJ)
+      const parsedJson = await response.json();
 
-      for (let i = 0; i < parsedJson.length; i++) {
-        const nameH = document.createElement('h5');
-        const artistH = document.createElement('p');
+      if (parsedJson.id == "allTracks") {
+        for (let i = 0; i < parsedJson.tracks.length; i++) {
+          const trackDiv = document.createElement('div');
+          trackDiv.className = "trackDiv";
 
-        nameH.textContent = parsedJson[i].name;
-        artistH.textContent = 'By ' + parsedJson[i].relationships.artists[0].who;
-
-        content.appendChild(nameH);
-        content.appendChild(artistH);
-
-        // Not all tracks have art
-        // TODO: If no track art, use album art
-        if (parsedJson[i].children.artworks[0]) {
+          const nameH = document.createElement('h3');
+          const artistP = document.createElement('p');
+          const albumP = document.createElement('p');
           const image = document.createElement('img');
 
-          image.src = parsedJson[i].children.artworks[0].url;
+          nameH.textContent = parsedJson.tracks[i].name;
+
+          // First artist
+          artistP.textContent = 'By ' + parsedJson.tracks[i].artists[0].artistName;
+
+          // All other artists
+          for (let j = 1; j < parsedJson.tracks[i].artists.length; j++) {
+            artistP.textContent = artistP.textContent + ", " + parsedJson.tracks[i].artists[j].artistName;
+          }
+
+          albumP.textContent = 'Album: ' + parsedJson.tracks[i].album;
+          image.src = parsedJson.tracks[i].trackArt;
           image.width = 200;
           image.height = 200;
 
-          content.appendChild(image);
+          trackDiv.appendChild(nameH);
+          trackDiv.appendChild(artistP);
+          trackDiv.appendChild(albumP);
+          trackDiv.appendChild(image);
+
+          content.appendChild(trackDiv);
         }
       }
+      else if (parsedJson.id == "allArtists") {
+        const artistsDiv = document.createElement('div');
+        artistsDiv.className = "trackDiv" // this is a lie i just dont want to do more classes rn
+
+        const artistsP = document.createElement('p');
+
+        // First artist
+        artistsP.textContent = "Artists: " + parsedJson.artists[0].artistName;
+
+        for (let i = 1; i < parsedJson.artists.length; i++){
+          artistsP.textContent = artistsP.textContent + ", " + parsedJson.artists[i].artistName;
+        }
+
+        artistsDiv.appendChild(artistsP);
+        content.appendChild(artistsDiv);
+      }
     }
+
 
     const sendPostRequest = async (form) => {
       const url = form.getAttribute('action');
@@ -145,16 +172,17 @@
       <input id="ageField" type="number" name="age" min="0" max="100" step="1" />
       <input type="submit" value="Add User" />
     </form>
-    <form id="userForm" action="/getTracks" method="get">
+    <form id="userForm" action="/getAllTracks" method="get">
       <select id='urlField'>
-        <option value='/getTracks'>/getTracks</option>
+        <option value='/getAllTracks'>/getAllTracks</option>
         <option value='/notReal'>/notReal</option>
+        <option value='/getAllArtists'>/getAllArtists</option>
       </select>
       <select id="methodSelect">
         <option value="get">GET</option>
         <option value="head">HEAD</option>
       </select>
-      <input type="submit" value="Get User" />
+      <input type="submit" value="Submit Request" />
     </form>
   </section>
   <section id="content">
