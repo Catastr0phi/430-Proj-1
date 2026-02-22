@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Our simple HTTP server</title>
+  <title>Homestuck OST API Test</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
 
   <script>
@@ -42,17 +42,23 @@
       const parsedJson = await response.json();
 
       // TODO: this is probably better as a switch
-      if (parsedJson.id == "allTracks") {
+      if (parsedJson.id == "allTracks" || parsedJson.id == "getAllByArtist") {
         for (let i = 0; i < parsedJson.tracks.length; i++) {
           const trackDiv = document.createElement('div');
-          trackDiv.className = "trackDiv";
+          trackDiv.className = "infoDiv";
 
           const nameH = document.createElement('h3');
           const artistP = document.createElement('p');
           const albumP = document.createElement('p');
           const image = document.createElement('img');
 
-          nameH.textContent = parsedJson.tracks[i].name;
+          // If there is a valid URL, make the header a link. Otherwise just make it text
+          if (parsedJson.tracks[i].urls[0]) {
+            nameH.innerHTML = `<a href="${parsedJson.tracks[i].urls[0]}">${parsedJson.tracks[i].name}</a>`;
+          }
+          else {
+            nameH.textContent = parsedJson.tracks[i].name;
+          }
 
           // First artist
           artistP.textContent = 'By ' + parsedJson.tracks[i].artists[0].artistName;
@@ -73,7 +79,7 @@
           trackDiv.appendChild(image);
 
           // Check for rating
-          if (parsedJson.tracks[i].rating){
+          if (parsedJson.tracks[i].rating) {
             const ratingH = document.createElement('h3');
 
             ratingH.textContent = "Rating: " + parsedJson.tracks[i].rating + "/10"
@@ -86,15 +92,23 @@
       }
       else if (parsedJson.id == "allArtists") {
         const artistsDiv = document.createElement('div');
-        artistsDiv.className = "trackDiv"; // this is a lie i just dont want to do more classes rn
+        artistsDiv.className = "infoDiv";
 
         const artistsP = document.createElement('p');
 
         // First artist
         artistsP.textContent = "Artists: " + parsedJson.artists[0].artistName;
+        
+        if (parsedJson.artists[0].rating){
+            artistsP.textContent = artistsP.textContent + ` (${parsedJson.artists[0].rating}/10)`;
+          }
 
-        for (let i = 1; i < parsedJson.artists.length; i++){
+        for (let i = 1; i < parsedJson.artists.length; i++) {
           artistsP.textContent = artistsP.textContent + ", " + parsedJson.artists[i].artistName;
+
+          if (parsedJson.artists[i].rating){
+            artistsP.textContent = artistsP.textContent + ` (${parsedJson.artists[i].rating}/10)`;
+          }
         }
 
         artistsDiv.appendChild(artistsP);
@@ -102,15 +116,15 @@
       }
       // Default behavior if nothing else has been set up
       else {
-          const jsonDiv = document.createElement('div');
-          jsonDiv.className = "trackDiv";
+        const jsonDiv = document.createElement('div');
+        jsonDiv.className = "infoDiv";
 
-          const jsonP = document.createElement('p');
+        const jsonP = document.createElement('p');
 
-          jsonP.textContent = JSON.stringify(parsedJson);
+        jsonP.textContent = JSON.stringify(parsedJson);
 
-          jsonDiv.appendChild(jsonP);
-          content.appendChild(jsonDiv);
+        jsonDiv.appendChild(jsonP);
+        content.appendChild(jsonDiv);
       }
     }
 
@@ -146,8 +160,8 @@
       const method = form.querySelector('#methodSelect').value;
 
       // Add query parameters if searchig for a particular song
-      if (url == '/getTrack'){
-        url = url + '?' + new URLSearchParams({trackName: form.querySelector('#trackNameField').value});
+      if (url == '/getTrack' || url == '/getAllByArtist') {
+        url = url + '?' + new URLSearchParams({ searchParam: form.querySelector('#searchParamField').value });
       }
 
       const options = {
@@ -164,13 +178,20 @@
 
 
     const init = () => {
-      const nameForm = document.querySelector('#nameForm');
+      const songRateForm = document.querySelector('#songRateForm');
+      const artistRateForm = document.querySelector('#artistRateForm');
       const userForm = document.querySelector('#userForm');
 
       // Prevent the forms default behavior
-      const sendPost = (e) => {
+      const sendSongPost = (e) => {
         e.preventDefault();
-        sendPostRequest(nameForm);
+        sendPostRequest(songRateForm);
+        return false;
+      }
+
+      const sendArtistPost = (e) => {
+        e.preventDefault();
+        sendPostRequest(artistRateForm);
         return false;
       }
 
@@ -180,7 +201,8 @@
         return false;
       }
 
-      nameForm.addEventListener('submit', sendPost);
+      songRateForm.addEventListener('submit', sendSongPost);
+      artistRateForm.addEventListener('submit', sendArtistPost);
       userForm.addEventListener('submit', sendGet);
     }
 
@@ -192,17 +214,25 @@
 <body>
   <section id="top">
     <h3>POST Status Code Tests</h3>
-    <form id="nameForm" action="/rateTrack" method="post">
-      <label for="name">Name: </label>
+    <form id="songRateForm" action="/rateTrack" method="post">
+      <label for="name">Song Name: </label>
       <input id="nameField" type="text" name="name" />
       <label for="rating">Rating: </label>
       <input id="rateField" type="number" name="rating" min="0" max="10" step="1" />
-      <input type="submit" value="Add User" />
+      <input type="submit" value="Rate Song" />
+    </form>
+    <form id="artistRateForm" action="/rateArtist" method="post">
+      <label for="name">Artist Name: </label>
+      <input id="nameField" type="text" name="name" />
+      <label for="rating">Rating: </label>
+      <input id="rateField" type="number" name="rating" min="0" max="10" step="1" />
+      <input type="submit" value="Rate Artist" />
     </form>
     <form id="userForm" action="/getAllTracks" method="get">
       <select id='urlField'>
         <option value='/getAllTracks'>/getAllTracks</option>
         <option value='/getTrack'>/getTrack</option>
+        <option value='/getAllByArtist'>/getAllByArtist</option>
         <option value='/getAllArtists'>/getAllArtists</option>
         <option value='/getAllAlbums'>/getAllAlbums</option>
         <option value='/notReal'>/notReal</option>
@@ -211,8 +241,8 @@
         <option value="get">GET</option>
         <option value="head">HEAD</option>
       </select>
-      <label for="trackName">Track Name: </label>
-      <input id="trackNameField" type="text" name="trackName"/>
+      <label for="searchParam">Track/Artist Name: </label>
+      <input id="searchParamField" type="text" name="searchParam" />
       <input type="submit" value="Submit Request" />
     </form>
   </section>

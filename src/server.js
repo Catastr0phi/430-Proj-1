@@ -11,7 +11,9 @@ const urlStruct = {
     '/getAllArtists': apiHandler.getAllArtists,
     '/getAllAlbums': apiHandler.getAllAlbums,
     '/getTrack': apiHandler.getTrack,
+    '/getAllByArtist': apiHandler.getAllByArtist,
     '/rateTrack': apiHandler.rateTrack,
+    '/rateArtist': apiHandler.rateArtist,
     'notFound': apiHandler.notFound
 };
 
