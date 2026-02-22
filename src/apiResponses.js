@@ -39,43 +39,8 @@ const getAllTracks = (request, response) => {
     };
 
     for (let i = 0; i < trackData.tracks.length; i++) {
-        let name = trackData.tracks[i].name;
 
-        // Get all artists
-        const artistsOBJ = [];
-
-        for (let j = 0; j < trackData.tracks[i].relationships.artists.length; j++) {
-            let artistDirName = trackData.tracks[i].relationships.artists[j].who;
-
-            // Find artist directory
-            let artistData = trackData.artists.find(a => a.directory === artistDirName);
-
-            artistsOBJ.push({
-                artistName: artistData.name
-            })
-        }
-
-        // Get album
-        let albumDirName = trackData.tracks[i].relationships.album;
-        let albumData = trackData.albums.find(a => a.directory === albumDirName);
-        let album = albumData.name;
-
-        // Get track art
-        // If track doesn't have unique art, use the album art
-        let trackArt;
-        if (trackData.tracks[i].children.artworks[0]) {
-            trackArt = trackData.tracks[i].children.artworks[0].url;
-        }
-        else {
-            trackArt = albumData.children.artworks[0].url;
-        }
-
-        responseJSON.tracks.push({
-            name: name,
-            artists: artistsOBJ,
-            album: album,
-            trackArt: trackArt
-        });
+        responseJSON.tracks.push(buildTrackOBJ(trackData.tracks[i]));
     }
 
     return respond(request, response, 200, responseJSON);
@@ -96,36 +61,82 @@ const getAllArtists = (request, response) => {
     return respond(request, response, 200, responseJSON);
 }
 
-const rateTrack = (request, response) => {
-    // Default to success message
+const getAllAlbums = (request, response) => {
     const responseJSON = {
-        message: 'Created successfully'
+        id: "allAlbums",
+        albums: []
+    };
+
+    for (let i = 0; i < trackData.albums.length; i++) {
+        responseJSON.albums.push({
+            albumName: trackData.albums[i].name,
+            albumArt: trackData.albums[i].children.artworks[0].url,
+            tracks: trackData.albums[i].children.trackSections[0].relationships.tracks
+            // TODO: Currently tracks holds directory names, not the actual track names. Also does not support bonus tracks.
+            // Build the track array seperately to use actual names + bonus tracks
+        })
+    }
+
+    return respond(request, response, 200, responseJSON);
+}
+
+const getTrack = (request, response) => {
+    let responseJSON = {
+        id: 'getTrack'
+    }
+
+    let requestedTrack = request.query.trackName;
+
+    let thisTrackData = trackData.tracks.find(n => n.name === requestedTrack);
+
+    // Send error if track not found
+    if (!thisTrackData){
+        responseJSON.message = 'Track not found';
+        responseJSON.errorId = 'trackNotFound';
+
+        return respond(request, response, 404, responseJSON);
+    }
+
+        responseJSON.track = buildTrackOBJ(thisTrackData);
+
+        return respond(request, response, 200, responseJSON);
+}
+
+const rateTrack = (request, response) => {
+    const responseJSON = {
+        id: 'rateTrack'
     };
 
     // get name and body from request
-    const { name, age } = request.body;
+    const { name, rating } = request.body;
 
     // check for both fields, send appropriate response if missing
-    if (!name || !age) {
-        responseJSON.message = 'Name and age are both required.';
-        responseJSON.id = 'missingParams';
+    if (!name || !rating) {
+        responseJSON.message = 'Name and rating are both required.';
+        responseJSON.errorId = 'missingParams';
 
         return respond(request, response, 400, responseJSON);
     }
 
     let code = 204;
 
-    // Check for existing name
-    if (!users[name]) {
-        // If name doesnt exist, create user and update code
-        users[name] = {
-            name: name
+    let trackFound = false;
+    // Find index of track and give it a rating
+    for (let i = 0; i < trackData.tracks.length; i++) {
+        if (name === trackData.tracks[i].name) {
+            trackData.tracks[i].rating = rating;
+            trackFound = true;
+            break;
         }
-
-        code = 201;
     }
 
-    users[name].age = age;
+    // If track wasnt found, send error
+    if (!trackFound) {
+        responseJSON.message = 'Track not found';
+        responseJSON.errorId = 'trackNotFound';
+
+        return respond(request, response, 404, responseJSON);
+    }
 
     // Send response based on code
     if (code == 201) return respond(request, response, code, responseJSON);
@@ -141,9 +152,60 @@ const notFound = (request, response) => {
     return respond(request, response, 404, notFoundJSON);
 }
 
+// Builds a json object for a single track
+const buildTrackOBJ = (thisTrackData) => {
+     // Get data for this track
+    let name = thisTrackData.name;
+
+        // Get all artists
+        const artistsOBJ = [];
+
+        for (let j = 0; j < thisTrackData.relationships.artists.length; j++) {
+            let artistDirName = thisTrackData.relationships.artists[j].who;
+
+            // Find artist directory
+            let artistData = trackData.artists.find(a => a.directory === artistDirName);
+
+            artistsOBJ.push({
+                artistName: artistData.name
+            })
+        }
+
+        // Get album
+        let albumDirName = thisTrackData.relationships.album;
+        let albumData = trackData.albums.find(a => a.directory === albumDirName);
+        let album = albumData.name;
+
+        // Get track art
+        // If track doesn't have unique art, use the album art
+        let trackArt;
+        if (thisTrackData.children.artworks[0]) {
+            trackArt = thisTrackData.children.artworks[0].url;
+        }
+        else {
+            trackArt = albumData.children.artworks[0].url;
+        }
+
+        let trackOBJ = {
+            name: name,
+            artists: artistsOBJ,
+            album: album,
+            trackArt: trackArt
+        }
+
+        // Check for rating and add if applicable
+        if (thisTrackData.rating){
+            trackOBJ.rating = thisTrackData.rating;
+        }
+
+        return trackOBJ;
+}
+
 module.exports = {
     getAllTracks,
     getAllArtists,
+    getAllAlbums,
+    getTrack,
     rateTrack,
     notFound
 }

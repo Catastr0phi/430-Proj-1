@@ -9,7 +9,9 @@ const urlStruct = {
     '/style.css': clientHandler.getStyle,
     '/getAllTracks': apiHandler.getAllTracks,
     '/getAllArtists': apiHandler.getAllArtists,
-    '/rateTrack': apiHandler.addUser,
+    '/getAllAlbums': apiHandler.getAllAlbums,
+    '/getTrack': apiHandler.getTrack,
+    '/rateTrack': apiHandler.rateTrack,
     'notFound': apiHandler.notFound
 };
 
