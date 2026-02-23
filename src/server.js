@@ -41,8 +41,18 @@ const onRequest = (request, response) => {
         if (body.length !== 0) {
 
             const bodyString = Buffer.concat(body).toString();
-            console.log(bodyString);
-            request.body = JSON.parse(bodyString);
+
+            if (request.headers.contentType == 'application/json') {
+                request.body = JSON.parse(bodyString);
+                console.log(JSON.parse(bodyString));
+            }
+            else {
+                const decoded = new URLSearchParams(bodyString);
+                request.body = {
+                    name: decoded.get('name'),
+                    rating: decoded.get('rating')
+                }
+            }
         }
 
         if (urlStruct[parsedUrl.pathname]) {

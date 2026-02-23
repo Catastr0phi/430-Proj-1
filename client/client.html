@@ -98,15 +98,15 @@
 
         // First artist
         artistsP.textContent = "Artists: " + parsedJson.artists[0].artistName;
-        
-        if (parsedJson.artists[0].rating){
-            artistsP.textContent = artistsP.textContent + ` (${parsedJson.artists[0].rating}/10)`;
-          }
+
+        if (parsedJson.artists[0].rating) {
+          artistsP.textContent = artistsP.textContent + ` (${parsedJson.artists[0].rating}/10)`;
+        }
 
         for (let i = 1; i < parsedJson.artists.length; i++) {
           artistsP.textContent = artistsP.textContent + ", " + parsedJson.artists[i].artistName;
 
-          if (parsedJson.artists[i].rating){
+          if (parsedJson.artists[i].rating) {
             artistsP.textContent = artistsP.textContent + ` (${parsedJson.artists[i].rating}/10)`;
           }
         }
@@ -133,15 +133,20 @@
       const url = form.getAttribute('action');
       const method = form.getAttribute('method');
 
+      const format = form.querySelector('#formatSelect').value;
+
       const name = form.querySelector('#nameField').value;
       const rating = form.querySelector('#rateField').value;
 
-      const formData = JSON.stringify({ name, rating });
+      let formData;
 
+      if (format == 'application/json') formData = JSON.stringify({ name, rating });
+      else formData = `name=${name}&rating=${rating}`;
+      
       const options = {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': format,
           'Content-Length': formData.length,
           'Accept': 'application/json'
         },
@@ -215,6 +220,10 @@
   <section id="top">
     <h3>POST Status Code Tests</h3>
     <form id="songRateForm" action="/rateTrack" method="post">
+      <select id="formatSelect">
+        <option value="application/json">JSON</option>
+        <option value="application/x-www-form-urlencoded">urlencoded</option>
+      </select>
       <label for="name">Song Name: </label>
       <input id="nameField" type="text" name="name" />
       <label for="rating">Rating: </label>
@@ -222,6 +231,10 @@
       <input type="submit" value="Rate Song" />
     </form>
     <form id="artistRateForm" action="/rateArtist" method="post">
+      <select id="formatSelect">
+        <option value="application/json">JSON</option>
+        <option value="application/x-www-form-urlencoded">urlencoded</option>
+      </select>
       <label for="name">Artist Name: </label>
       <input id="nameField" type="text" name="name" />
       <label for="rating">Rating: </label>
