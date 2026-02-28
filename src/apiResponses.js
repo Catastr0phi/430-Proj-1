@@ -73,13 +73,27 @@ const getAllAlbums = (request, response) => {
     };
 
     for (let i = 0; i < ostData.albums.length; i++) {
-        responseJSON.albums.push({
+        const albumData = {
             albumName: ostData.albums[i].name,
             albumArt: ostData.albums[i].children.artworks[0].url,
-            tracks: ostData.albums[i].children.trackSections[0].relationships.tracks
-            // TODO: Currently tracks holds directory names, not the actual track names. Also does not support bonus tracks.
-            // Build the track array seperately to use actual names + bonus tracks
-        })
+            urls: ostData.albums[i].urls
+        }
+
+        // Albums can have multiple track sections, be sure to get all of them
+        let albumTrackDirs = [];
+        for (let j = 0; j < ostData.albums[i].children.trackSections.length; j++){
+            albumTrackDirs = albumTrackDirs.concat(ostData.albums[i].children.trackSections[j].relationships.tracks);
+        }
+        const albumTracks = [];
+
+        for (let j = 0; j < albumTrackDirs.length; j++) {
+            const currentTrackData = ostData.tracks.find(t => t.directory === albumTrackDirs[j]);
+            albumTracks.push(currentTrackData.name);
+        }
+
+        albumData.tracks = albumTracks;
+
+        responseJSON.albums.push(albumData);
     }
 
     return respond(request, response, 200, responseJSON);
