@@ -42,11 +42,12 @@ const onRequest = (request, response) => {
 
             const bodyString = Buffer.concat(body).toString();
 
-            if (request.headers.contentType == 'application/json') {
+            if (request.headers['content-type'] == 'application/json') {
                 request.body = JSON.parse(bodyString);
                 console.log(JSON.parse(bodyString));
             }
             else {
+                
                 const decoded = new URLSearchParams(bodyString);
                 request.body = {
                     name: decoded.get('name'),

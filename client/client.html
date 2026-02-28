@@ -9,34 +9,36 @@
     const handleResponse = async (response) => {
       // get page content section and clear
       const content = document.querySelector('#content');
+      const status = document.querySelector('#status');
       content.innerHTML = '';
+      status.innerHTML = '';
 
       // Create header for status message
-      const statusHeader = document.createElement('h1');
+      let statusHeader = '';
 
       // Switch statement for header based on code
       switch (response.status) {
         case 200:
-          statusHeader.textContent = 'Success';
+          statusHeader = 'Success';
           break;
         case 201:
-          statusHeader.textContent = 'Created';
+          statusHeader = 'Created';
           break;
         case 204:
-          statusHeader.textContent = 'Updated (No Content)';
+          statusHeader = 'Updated (No Content)';
           break;
         case 400:
-          statusHeader.textContent = 'Bad Request';
+          statusHeader = 'Bad Request';
           break;
         case 404:
-          statusHeader.textContent = 'Not Found';
+          statusHeader = 'Not Found';
           break;
         default:
-          statusHeader.textContent = 'Error not implemented. Something has gone very wrong!'
+          statusHeader = 'Error not implemented. Something has gone very wrong!'
           break;
       }
 
-      content.appendChild(statusHeader);
+      status.textContent = statusHeader;
 
       // get json obj
       const parsedJson = await response.json();
@@ -73,6 +75,11 @@
           image.width = 200;
           image.height = 200;
 
+          nameH.className = "trackName";
+          artistP.className = "trackArtist";
+          albumP.className = "trackAlbum";
+          image.className = "trackImage";
+
           trackDiv.appendChild(nameH);
           trackDiv.appendChild(artistP);
           trackDiv.appendChild(albumP);
@@ -83,6 +90,8 @@
             const ratingH = document.createElement('h3');
 
             ratingH.textContent = "Rating: " + parsedJson.tracks[i].rating + "/10"
+
+            ratingH.className = "trackRating";
 
             trackDiv.appendChild(ratingH);
           }
@@ -218,7 +227,7 @@
 
 <body>
   <section id="top">
-    <h3>POST Status Code Tests</h3>
+    <h3>Homestuck OST API Tests</h3>
     <form id="songRateForm" action="/rateTrack" method="post">
       <select id="formatSelect">
         <option value="application/json">JSON</option>
@@ -259,6 +268,7 @@
       <input type="submit" value="Submit Request" />
     </form>
   </section>
+  <h1 id="status"></h1>
   <section id="content">
   </section>
 </body>
