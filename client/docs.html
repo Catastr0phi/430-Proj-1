@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Homestuck OST API Docs</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+
+<body>
+<section id="top">
+    <h1>Homestuck OST API Documentation</h1>
+    <h4><a href="/" id="pageLink">Return to tests</a></h4>
+</section>
+<section id="info">
+    <div id="credits">
+        <p>An API for getting information on tracks, artists, and albums from the Homestuck OST.
+            Also allows for rating of tracks and artists.</p>
+        <p>Credit to the contributors of the <a href="https://hsmusic.wiki/about/">Homestuck Music Wiki</a> for compiling this information and allowing its usage.</p>
+        <p>All json responses start with an id that matches the request URL</p>
+    </div>
+    <div id="getsInfo">
+        <h1>GET/HEAD requests</h1>
+        <h3>getAllTracks</h3>
+        <p>Returns a json object containing all tracks on the OST and their relevant info.</p>
+        <p>No params</p>
+        <p>Format: {tracks:[{name: string, artists: [string], album: string, trackArt: string, urls: [string], rating: number} ...]}</p>
+        <br>
+        <h3>getTrack</h3>
+        <p>Returns a json object containing information for the searched track</p>
+        <p>Params: Title (string - name of track)</p>
+        <p>Format: {name: string, artists: [string], album: string, trackArt: string, urls: [string], rating: number}</p>
+        <br>
+        <h3>getAllByArtist</h3>
+        <p>Returns a json object containing all tracks made by the searched artist</p>
+        <p>Params: Name (string - name of artist)</p>
+        <p>Format: {tracks:[{name: string, artists: [string], album: string, trackArt: string, urls: [string], rating: number} ...]}</p>
+        <br>
+        <h3>getAllArtists</h3>
+        <p>Returns a json object containing information on all artists who have contributed to the OST</p>
+        <p>No params</p>
+        <p>Format: {artists: [{artistName: string, rating: number} ... ]}</p>
+        <br>
+        <h3>getAllAlbums</h3>
+        <p>Returns a json object containing all albums and their relevant information</p>
+        <p>No params</p>
+        <p>Format: {albums:[{albumName: string, albumArt: string, urls: [string], tracksL [string]} ...]}</p>
+    </div>
+    <div id="postsInfo">
+        <h1>POST requests</h1>
+        <h3>rateTrack</h3>
+        <p>Adds a numeric rating to a track</p>
+        <p>Params: Name (string - name of track), Rating (number - rating of track from 0-10)</p>
+        <p>Supported formats: application/json, application/x-www-form-urlencoded</p>
+        <h4>Examples</h4>
+        <p>Body: {name: 'track1', rating: 9}</p>
+        <p>Result: {name: 'track1', artists: [...], album: '...', trackArt: '...', urls: [...], rating: 9}</p>
+        <p>Body: {name: 'track1'}</p>
+        <p>Result: 400 Error (missing params)</p>
+        <p>Body: {name: 'notReal', rating: 10}</p>
+        <p>Result: 404 Error (track not found)</p>
+        <br>
+        <h3>rateArtist</h3>
+        <p>Adds a numeric rating to an artist</p>
+        <p>Params: Name (string - name of artist), Rating (number - rating of artist from 0-10)</p>
+        <p>Supported formats: application/json, application/x-www-form-urlencoded</p>
+        <h4>Examples</h4>
+        <p>Body: {name: 'artist1', rating: 7}</p>
+        <p>Result: {artistName: 'artist1', rating: 7}</p>
+        <p>Body: {name: 'artist1'}</p>
+        <p>Result: 400 Error (missing params)</p>
+        <p>Body: {name: 'notReal', rating: 10}</p>
+        <p>Result: 404 Error (artist not found)</p>
+    </div>
+</section>
+</body>
+
+</html>

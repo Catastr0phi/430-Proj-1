@@ -97,6 +97,29 @@ html, body {
   height: auto;
 }
 
+#info {
+  text-align: center;
+  justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#credits, #getsInfo, #postsInfo {
+  border: 4px solid #c6c6c6;
+  background-color: #EEEEEE;
+  padding: 10px 25px;
+  width: 80vw;
+  height: auto;
+}
+
+#getsInfo p, #getsInfo h3, #postsInfo p, #postsInfo h3, #postsInfo h4 {
+  text-align: left;
+}
+
+#pageLink:link, #pageLink:visited {
+  color:#c6c6c6;
+}
+
 @media (max-width: 1000px){
   .tracksDiv {
   width: 80vw;
