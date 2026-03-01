@@ -6,6 +6,7 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
 
   <script>
+    // Helper function for building divs with track info
     const buildTracksDiv = (content, data) => {
       const trackDiv = document.createElement('div');
       trackDiv.className = "tracksDiv";
@@ -97,75 +98,82 @@
       // get json obj
       const parsedJson = await response.json();
 
-      // TODO: this is probably better as a switch
-      if (parsedJson.id == "allTracks" || parsedJson.id == "getAllByArtist") {
-        for (let i = 0; i < parsedJson.tracks.length; i++) {
+      // Builds webpage based on response id
+      switch (parsedJson.id) {
+        case "allTracks":
+        case "getAllByArtist":
+          // Build a div for each track
+          for (let i = 0; i < parsedJson.tracks.length; i++) {
+            buildTracksDiv(content, parsedJson.tracks[i]);
+          }
+          break;
+        case "getTrack":
+          // Build a div for this track
           buildTracksDiv(content, parsedJson.tracks[i]);
-        }
-      }
-      else if (parsedJson.id == "getTrack") {
-        buildTracksDiv(content, parsedJson.track);
-      }
-      else if (parsedJson.id == "allArtists") {
-        const artistsDiv = document.createElement('div');
-        artistsDiv.className = "artistsDiv";
+          break;
+        case "allArtists":
+          // Create a div with artist info
+          const artistsDiv = document.createElement('div');
+          artistsDiv.className = "artistsDiv";
 
-        const artistsP = document.createElement('p');
+          const artistsP = document.createElement('p');
 
-        // First artist
-        artistsP.textContent = "Artists: " + parsedJson.artists[0].artistName;
+          // First artist
+          artistsP.textContent = "Artists: " + parsedJson.artists[0].artistName;
 
-        if (parsedJson.artists[0].rating) {
-          artistsP.textContent = artistsP.textContent + ` (${parsedJson.artists[0].rating}/10)`;
-        }
-
-        for (let i = 1; i < parsedJson.artists.length; i++) {
-          artistsP.textContent = artistsP.textContent + ", " + parsedJson.artists[i].artistName;
-
-          if (parsedJson.artists[i].rating) {
-            artistsP.textContent = artistsP.textContent + ` (${parsedJson.artists[i].rating}/10)`;
-          }
-        }
-
-        artistsDiv.appendChild(artistsP);
-        content.appendChild(artistsDiv);
-      }
-      else if (parsedJson.id == "allAlbums") {
-        for (let i = 0; i < parsedJson.albums.length; i++) {
-          const albumDiv = document.createElement('div');
-          albumDiv.className = "albumDiv";
-
-          const nameH = document.createElement('h3');
-          const image = document.createElement('img');
-
-          if (parsedJson.albums[i].urls[0]) {
-            nameH.innerHTML = `<a href="${parsedJson.albums[i].urls[0]}">${parsedJson.albums[i].albumName}</a>`;
-          }
-          else {
-            nameH.innerHTML = parsedJson.albums[i].albumName;
+          if (parsedJson.artists[0].rating) {
+            artistsP.textContent = artistsP.textContent + ` (${parsedJson.artists[0].rating}/10)`;
           }
 
-          image.src = parsedJson.albums[i].albumArt;
-          image.width = 300;
-          image.height = 300;
+          for (let i = 1; i < parsedJson.artists.length; i++) {
+            artistsP.textContent = artistsP.textContent + ", " + parsedJson.artists[i].artistName;
 
-          albumDiv.appendChild(nameH);
-          albumDiv.appendChild(image);
+            if (parsedJson.artists[i].rating) {
+              artistsP.textContent = artistsP.textContent + ` (${parsedJson.artists[i].rating}/10)`;
+            }
+          }
 
-          content.appendChild(albumDiv);
-        }      
-      }
-      // Default behavior if nothing else has been set up
-      else {
-        const jsonDiv = document.createElement('div');
-        jsonDiv.className = "infoDiv";
+          artistsDiv.appendChild(artistsP);
+          content.appendChild(artistsDiv);
+          break;
+        case "allAlbums":
+          // Build divs for each album
+          for (let i = 0; i < parsedJson.albums.length; i++) {
+            const albumDiv = document.createElement('div');
+            albumDiv.className = "albumDiv";
 
-        const jsonP = document.createElement('p');
+            const nameH = document.createElement('h3');
+            const image = document.createElement('img');
 
-        jsonP.textContent = JSON.stringify(parsedJson);
+            if (parsedJson.albums[i].urls[0]) {
+              nameH.innerHTML = `<a href="${parsedJson.albums[i].urls[0]}">${parsedJson.albums[i].albumName}</a>`;
+            }
+            else {
+              nameH.innerHTML = parsedJson.albums[i].albumName;
+            }
 
-        jsonDiv.appendChild(jsonP);
-        content.appendChild(jsonDiv);
+            image.src = parsedJson.albums[i].albumArt;
+            image.width = 300;
+            image.height = 300;
+
+            albumDiv.appendChild(nameH);
+            albumDiv.appendChild(image);
+
+            content.appendChild(albumDiv);
+          }
+          break;
+        default:
+          // Create a div and print the json response
+          const jsonDiv = document.createElement('div');
+          jsonDiv.className = "infoDiv";
+
+          const jsonP = document.createElement('p');
+
+          jsonP.textContent = JSON.stringify(parsedJson);
+
+          jsonDiv.appendChild(jsonP);
+          content.appendChild(jsonDiv);
+          break;
       }
     }
 
@@ -205,7 +213,7 @@
       let url = form.querySelector('#urlField').value;
       const method = form.querySelector('#methodSelect').value;
 
-      // Add query parameters if searchig for a particular song
+      // Add query parameters if searching for a particular song
       if (url == '/getTrack' || url == '/getAllByArtist') {
         url = url + '?' + new URLSearchParams({ searchParam: form.querySelector('#searchParamField').value });
       }
