@@ -23,27 +23,32 @@
         <h3>getAllTracks</h3>
         <p>Returns a json object containing all tracks on the OST and their relevant info.</p>
         <p>No params</p>
-        <p>Format: {tracks:[{name: string, artists: [string], album: string, trackArt: string, urls: [string], rating: number} ...]}</p>
+        <p>Format: {tracks:[{name: string, artists: [string], album: string, trackArt: string, urls: [string], rating: number}, ...]}</p>
+        <p>Example: {tracks:[{name: 'track1', artists: ['artist1, artist2'], album: 'album1', trackArt: 'artURL', urls: ['url1', 'url2'], rating: 9}, ...]}</p>
         <br>
         <h3>getTrack</h3>
         <p>Returns a json object containing information for the searched track</p>
         <p>Params: Title (string - name of track)</p>
         <p>Format: {name: string, artists: [string], album: string, trackArt: string, urls: [string], rating: number}</p>
+        <p>Example: With request "track1" - {name: 'track1', artists: ['artist1', 'artist2'], album: 'album1', trackArt: 'artURL', urls: ['url1', 'url2'], rating: 9}</p>
         <br>
         <h3>getAllByArtist</h3>
         <p>Returns a json object containing all tracks made by the searched artist</p>
         <p>Params: Name (string - name of artist)</p>
-        <p>Format: {tracks:[{name: string, artists: [string], album: string, trackArt: string, urls: [string], rating: number} ...]}</p>
+        <p>Format: {tracks:[{name: string, artists: [string], album: string, trackArt: string, urls: [string], rating: number}, ...]}</p>
+        <p>Example: With request 'artist4' - {tracks:[{name: 'track7', artists: ['artist4'], album: 'album1', trackArt: 'artURL', urls: ['url1', 'url2'], rating: 7}, ...]}</p>
         <br>
         <h3>getAllArtists</h3>
         <p>Returns a json object containing information on all artists who have contributed to the OST</p>
         <p>No params</p>
-        <p>Format: {artists: [{artistName: string, rating: number} ... ]}</p>
+        <p>Format: {artists: [{artistName: string, rating: number}, ... ]}</p>
+        <p>Example: {artists: [{artistName: 'artist1', rating: 9}, {artistName: 'artist2', rating: 3} ... ]}</p>
         <br>
         <h3>getAllAlbums</h3>
         <p>Returns a json object containing all albums and their relevant information</p>
         <p>No params</p>
-        <p>Format: {albums:[{albumName: string, albumArt: string, urls: [string], tracksL [string]} ...]}</p>
+        <p>Format: {albums:[{albumName: string, albumArt: string, urls: [string], tracks [string]}, ...]}</p>
+        <p>Example: {albums:[{albumName: 'album1', albumArt: 'artURL', urls: ['url1','url2'], tracks ['track1', 'track2', ...]}, ...]}</p>
     </div>
     <div id="postsInfo">
         <h1>POST requests</h1>
